@@ -12,6 +12,10 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
 
 @WebServlet(name = "SkiersServlet", value = "/skiers")
 public class SkiersServlet extends HttpServlet {
@@ -46,39 +50,41 @@ public class SkiersServlet extends HttpServlet {
             int time = liftRide.getTime();
             int liftId = liftRide.getLiftId();
 
-            // Perform basic parameter validation using switch statement
-            String invalidParameter ="";
-            switch (invalidParameter) {
-                case "resortId":
-                    if (resortId < 0) invalidParameter = "resortId";
-                    break;
-                case "seasonId":
-                    if (seasonId < 0) invalidParameter = "seasonId";
-                    break;
-                case "dayId":
-                    if (dayId < 0) invalidParameter = "dayId";
-                    break;
-                case "skierId":
-                    if (skierId < 0) invalidParameter = "skierId";
-                    break;
-                case "time":
-                    if (time < 0) invalidParameter = "time";
-                    break;
-                case "liftId":
-                    if (liftId < 0) invalidParameter = "liftId";
-                    break;
+            // Check for missing parameters
+            List<String> missingParameters = new ArrayList<>();
+            if (resortId <= 0) {
+                missingParameters.add("resortId");
+            }
+            if (seasonId <= 0) {
+                missingParameters.add("seasonId");
+            }
+            if (dayId <= 0) {
+                missingParameters.add("dayId");
+            }
+            if (skierId <= 0) {
+                missingParameters.add("skierId");
+            }
+            if (time <= 0) {
+                missingParameters.add("time");
+            }
+            if (liftId <= 0) {
+                missingParameters.add("liftId");
             }
 
-            // If any parameter is invalid, return a bad request response
-            if (invalidParameter != "") {
+            // If any parameter is missing, return a bad request response
+            if (!missingParameters.isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("Missing or invalid " + invalidParameter + " parameter");
-                return;
+                response.getWriter().write("Missing parameter(s): " + String.join(", ", missingParameters) + ". Response code: " + HttpServletResponse.SC_BAD_REQUEST);  return;
             }
 
-            // If all validations pass, return a success response
-            response.setStatus(HttpServletResponse.SC_CREATED);
-            response.getWriter().write("Lift ride recorded successfully");
+            // If all validations pass, return a success response along with the data
+
+            response.setContentType("application/json");
+            // Create a JSON representation of the recorded lift ride
+            String jsonResponse = mapper.writeValueAsString(liftRide);
+            response.getWriter().write(jsonResponse);
+            // Send a message indicating data received successfully
+            response.getWriter().write("Data received successfully. Response code: " + HttpServletResponse.SC_CREATED);
         } catch (Exception e) {
             // Log the exception
             e.printStackTrace();

@@ -72,11 +72,4 @@ public class LiftRide {
         this.time = time;
     }
 
-    public int getResortID() {
-        return resortId;
-    }
-
-    public int getSeasonID() {
-        return seasonId;
-    }
 }
